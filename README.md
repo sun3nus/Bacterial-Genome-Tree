@@ -59,7 +59,7 @@ tar –xvzf gtdbtk_data.tar.gz
 
 5. Conda 환경 변수 설정
 - conda env config vars set GTDBTK_DATA_PATH="your_path"
-- 압축해제한 gtdbtk_data 디렉토리의 위치를 "your_path"에 입력
+- 압축해제한 gtdbtk_data 디렉토리의 위치를 "your_path"에 입력합니다.
 ```bash
 conda env config vars set GTDBTK_DATA_PATH="/home/biotech/BI_2024/GTDB-tk/gtdbtk_data”
 source ~/.bashrc
@@ -69,3 +69,33 @@ source ~/.bashrc
 ```bash
 conda activate gtdbtk_env
 ```
+
+
+## 1.2 Run GTDB-tk
+1. raw data 준비
+- 생성된 fasta 디렉토리에 GTDB-Tk tree를 그릴 신종 균주의 whole genome fasta 파일을 넣습니다.
+- 이 fasta 파일이 GTDB-Tk의 input 파일입니다.
+```bash
+mkdir fasta
+```
+
+2. output 디렉토리 생성
+```bash
+mkdir classify_result
+```
+
+3. Classify Workflow
+```bash
+gtdbtk classify_wf -x fasta --genome_dir fasta/ --out_dir classify_result/all --cpus 3 --skip_ani_screen
+```
+- cf. 옵션 “-x”는 input 파일의 확장자로, 만약 확장자가 fna일 경우, “-x fna”로 지정
+
+4. Convert to ITOL
+- convert_to_itol 명령은 Newick 계통수를 [iTOL](https://itol.embl.de/)에서 시각화할 수 있도록 적합하게 만듭니다.
+```bash
+mkdir itol
+```
+```bash
+gtdbtk convert_to_itol --input ./classify_result/classify/gtdbtk.bac120.classify.tree.3.tree --output ./itol/itol.tree
+```
+
