@@ -58,15 +58,14 @@ tar –xvzf gtdbtk_data.tar.gz
 ```
 
 5. Conda 환경 변수 설정
+- conda env config vars set GTDBTK_DATA_PATH="your_path"
+- 압축해제한 gtdbtk_data 디렉토리의 위치를 "your_path"에 입력
 ```bash
 conda env config vars set GTDBTK_DATA_PATH="/home/biotech/BI_2024/GTDB-tk/gtdbtk_data”
 source ~/.bashrc
 ```
 
 6. GTDB-tk 환경 활성화
-
-- conda env config vars set GTDBTK_DATA_PATH="your_path"
-- 압축해제한 gtdbtk_data 디렉토리의 위치를 "your_path"에 입력
 ```bash
 conda activate gtdbtk_env
 ```
