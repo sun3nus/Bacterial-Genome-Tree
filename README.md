@@ -155,6 +155,33 @@ conda update conda
 2. *03_extract_Type_species.py*를 실행합니다.
 3. 실행 결과, input txt 파일 이름과 동일한 엑셀 파일이 형성되며, 이 엑셀 파일은 "Give number", "Type", "Submitted GenBank assembly", "Taxon", "Strain", "Url" 열로 구성되어 있습니다.
 4. "Type" 열이 **yes**인 균주들의 whole genome fasta 파일로 추후 UBCG tree 를 구축할 예정입니다.
+```python
+# 파일 위치 설정
+nwk_file_path = '../S1. SubTree/output/test_subtree.nwk'
+
+prefix_strings_revised = []
+with open(nwk_file_path, 'r') as file:
+    for line in file:
+        # 괄호와 쉼표를 포함하여 문자열을 분리
+        items = line.replace('(', ' ').replace(')', ' ').replace(',', ' ').split()
+        for item in items:
+            # 'RS' 또는 'GB'로 시작하는 문자열 추출
+            if item.startswith(('RS', 'GB')):
+                # ':' 문자 이전까지의 문자열 추출
+                prefix = item.split(':')[0]
+                # 'RS_' 또는 'GB_' 제거
+                cleaned_prefix = prefix[3:]
+                prefix_strings_revised.append(cleaned_prefix)
+
+# 결과 확인
+prefix_strings_revised[:10], len(prefix_strings_revised)  # 처음 10개 항목과 총 개수 출력
+
+# 결과 리스트를 텍스트 파일로 저장
+output_file_path = './output_WGS_acc/test_WGS_acc.txt'
+with open(output_file_path, 'w') as file:
+    for prefix in prefix_strings_revised:
+        file.write(prefix + '\n')
+```
 
 ### 1.5 Compare with LPSN Validation Type Species List
 GTDB-Tk 데이터베이스는 지속적으로 업데이트되는 되지만 많은 양의 신종 세균이 빠르게 업데이트 되기 때문에 모든 균주의 데이터를 포함하고 있지는 못합니다. <br/>
