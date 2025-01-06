@@ -70,6 +70,7 @@ source ~/.bashrc
 conda activate gtdbtk_env
 ```
 
+<br/>
 
 ### 1.2 Run GTDB-tk
 #### 1.2.1 raw data 준비
@@ -124,6 +125,7 @@ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh → enter → yes → re-start
 conda update conda
 ```
+<br/>
 
 ### 1.3 Generate GTDB-tk sub-tree
 #### 1.3.1 Visulation GTDB-Tk tree in iTOL
@@ -142,6 +144,8 @@ conda update conda
 1. *01_GTDB-Tk_subtree.py* 에서 **tree_file** 변수에 GTDB-Tk 실행 최종 결과 tree 파일의 위치와 **output_file** 변수에 저장될 output 파일의 위치와 이름을 입력합니다.
 2. **target_taxa** 리스트 변수에 iTOL에서 복사한 genus의 시작과 끝 species의 Node ID를 입력합니다.
 3. *01_GTDB-Tk.subtree.py* 실행합니다.
+
+<br/>
 
 ### 1.4 Filter Type Species and Collect GCA Acc
 #### 1.4.1 Extract Genome Accesion Number in Sub-tree
@@ -182,6 +186,7 @@ with open(output_file_path, 'w') as file:
     for prefix in prefix_strings_revised:
         file.write(prefix + '\n')
 ```
+<br/>
 
 ### 1.5 Compare with LPSN Validation Type Species List
 GTDB-Tk 데이터베이스는 지속적으로 업데이트되는 되지만 많은 양의 신종 세균이 빠르게 업데이트 되기 때문에 모든 균주의 데이터를 포함하고 있지는 못합니다. <br/>
