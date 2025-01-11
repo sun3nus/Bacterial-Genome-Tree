@@ -220,8 +220,71 @@ with open(output_file_path, 'w') as file:
 <br/>
 
 ### 1.5 Compare with LPSN Validation Type Species List
-GTDB-Tk 데이터베이스는 지속적으로 업데이트되는 되지만 많은 양의 신종 세균이 빠르게 업데이트 되기 때문에 모든 균주의 데이터를 포함하고 있지는 못합니다. <br/>
+GTDB-Tk 데이터베이스는 지속적으로 업데이트되지만 많은 양의 신종 세균이 빠르게 업데이트 되기 때문에 모든 균주의 데이터를 포함하고 있지는 못합니다. <br/>
 
-따라서 LPSN과 같은 validly published된 원핵생물(세균 및 고세균)의 공식적인 정보를 제공하는 온라인 데이터베이스에서 genus에 속한 species list와 비교할 필요가 있습니다.
+따라서 LPSN과 같은 validly published된 원핵생물(세균 및 고세균)의 공식적인 정보를 제공하는 온라인 데이터베이스와 GTDB-Tk 데이터베이스에서 필터링된 데이터를 비교할 필요가 있습니다.
+
+1. [LSPN](https://www.bacterio.net/)에 계통수를 구축하고자 하는 신종 균주의 genus를 입력합니다.
+2. Child taxa 표를 복사하여 새로운 엑셀 파일을 만듭니다. 파일 이름은 “속이름_LPSN_list.xlsx”로 하고, S3.CompareToLPSN 디렉토리의 input 폴더에 저장합니다.
+3. *04_LPSN_GTDB_Species_Comparison*에서 **file_path_LPSN**에 방금 생성한 엑셀 파일의 위치를 지정합니다.
+3. *04_LPSN_GTDB_Species_Comparison*를 실행합니다. 이 스크립트는 총 세가지 기능을 수행합니다.
+
+<br/>
+
+1. LPSN species list에서 validly published된 species만 필터링합니다.
+
+    * "Nomenclatural status" 열이 "validly published under the ICNP"인 데이터 중에는 "Taxonomic status"가 "correct name"과 "Synonym"인 것이 있는데, Synonym은 이전 명칭이므로 correct name인것만 필터링해야 합니다.
+    ```python
+    # input file 경로 설정 (사용자가 지정)
+    file_path_LPSN = 'input/Genus_LPSN_raw_list.xlsx'
+    file_path_GTDB = '../S2. ExtractType/output_WGS_acc/test_WGS_acc.xlsx'
+
+    # 결과를 저장할 디렉터리 생성 (없으면 생성)
+    os.makedirs("output_01_LPSN", exist_ok=True)
+    os.makedirs("output_02_Comparison", exist_ok=True)
+    os.makedirs("output_03_WGS", exist_ok=True)
+
+    # input file 읽기
+    LPSN_df = pd.read_excel(file_path_LPSN)
+    GTDB_df = pd.read_excel(file_path_GTDB)
+
+    ### 1. LPSN 데이터에서 validly published된 correct name 필터링
+
+    # "Taxonomic status" 값이 "correct name"인 행만 필터링
+    LPSN_df_filtered = LPSN_df[LPSN_df['Taxonomic status'] == 'correct name']
+
+    # "Name" 열의 앞 두 단어만 추출 -> 종 속 명만 추출
+    LPSN_df_filtered['Name'] = LPSN_df_filtered['Name'].apply(lambda x: ' '.join(x.split()[:2]))
+
+    # 총 데이터 개수 확인
+    total_count = len(LPSN_df_filtered)
+    print("LPSN validly published species 개수: ", total_count)
+
+    # 수정된 데이터프레임을 새로운 엑셀 파일로 저장
+    output_file_path_01 = 'output_01_LPSN/Genus_LPSN_validation_list.xlsx'
+    LPSN_df_filtered.to_excel(output_file_path_01, index=False)
+    ```
+2. LPSN과 GTDB-Tk 데이터의 validly published species 리스트를 비교하여 GTDB-Tk에서 누락된 species를 추출합니다.
+```python
+### 2. LPSN validly published species 리스트와 GTDB-Tk 데이터 비교
+
+# "Name" 열과 "Taxon" 열 추출
+LPSN_names = LPSN_df['Name'].dropna().unique()
+GTDB_names = GTDB_df['Taxon'].dropna().unique()
+
+# LPSN 데이터에는 있지만 GTDB 데이터에는 없는 species 추출
+missing_species = [name for name in LPSN_names if name not in GTDB_names]
+
+# 결과를 DataFrame으로 저장
+missing_species_df = pd.DataFrame(missing_species, columns=['Missing Species'])
+
+# 결과를 엑셀 파일로 저장
+output_file_path_02 = "output_02_Comparison/Genus_missing_species.xlsx"
+missing_species_df.to_excel(output_file_path_02, index=False)
+```
+
+3. 
+
+
  
 
