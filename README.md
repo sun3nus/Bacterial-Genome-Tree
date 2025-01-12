@@ -186,6 +186,36 @@ extract_subtree(tree_file, output_file, target_taxa)
 2. **output_file_path** 변수에 결과 파일의 위치와 이름을 입력합니다.
 3. *02_extract_WGS_acc.py* 를 실행합니다.
 4. 실행 결과, sub-tree 안의 모든 species의 genome accession number가 txt 파일 형식으로 추출됩니다.
+```python
+# nwk 파일에서 'RS' 또는 'GB'로 시작하는 문자열을 ':' 문자 이전까지 추출하고, 
+# 'RS_' 또는 'GB_'를 제거하여 저장
+
+# 파일 위치 설정
+nwk_file_path = '../S1. SubTree/output/test_subtree.nwk'
+
+prefix_strings_revised = []
+with open(nwk_file_path, 'r') as file:
+    for line in file:
+        # 괄호와 쉼표를 포함하여 문자열을 분리
+        items = line.replace('(', ' ').replace(')', ' ').replace(',', ' ').split()
+        for item in items:
+            # 'RS' 또는 'GB'로 시작하는 문자열 추출
+            if item.startswith(('RS', 'GB')):
+                # ':' 문자 이전까지의 문자열 추출
+                prefix = item.split(':')[0]
+                # 'RS_' 또는 'GB_' 제거
+                cleaned_prefix = prefix[3:]
+                prefix_strings_revised.append(cleaned_prefix)
+
+# 결과 확인
+prefix_strings_revised[:10], len(prefix_strings_revised)  # 처음 10개 항목과 총 개수 출력
+
+# 결과 리스트를 텍스트 파일로 저장
+output_file_path = './output_01_WGS_acc/test_WGS_acc.txt'
+with open(output_file_path, 'w') as file:
+    for prefix in prefix_strings_revised:
+        file.write(prefix + '\n')
+```
 
 #### 1.4.2 Filter Type species
 1. *03_extract_Type_species.py* 에서 **input_path** 변수에 앞서 생성한 genome accession number txt 파일의 위치를 입력합니다.
@@ -229,29 +259,20 @@ GTDB-Tk 데이터베이스는 지속적으로 업데이트되지만 많은 양�
 1. [LSPN](https://www.bacterio.net/)에 계통수를 구축하고자 하는 신종 균주의 genus를 입력합니다.
 2. Child taxa 표를 복사하여 새로운 엑셀 파일을 만듭니다. 파일 이름은 “속이름_LPSN_list.xlsx”로 하고, S3.CompareToLPSN 디렉토리의 input 폴더에 저장합니다.
 3. *04_LPSN_GTDB_Species_Comparison.py*에서 **file_path_LPSN**에 방금 생성한 엑셀 파일의 위치를 지정합니다.
-3. *04_LPSN_GTDB_Species_Comparison.py*를 실행합니다. 이 스크립트는 총 세가지 기능을 수행합니다.
+3. *04_LPSN_GTDB_Species_Comparison.py*를 실행합니다.
 
 <br/>
-
-#### 1.5.0 *04_LPSN_GTDB_Species_Comparison.py* 실행에 필요한 라이브러리 및 모듈 불러오기
-```python
-import pandas as pd
-import os
-
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-```
 
 #### 1.5.1 LPSN species list에서 validly published된 species만 필터링합니다.
 
 * "Nomenclatural status" 열이 "validly published under the ICNP"인 데이터 중에는 "Taxonomic status"가 "correct name"과 "Synonym"인 것이 있는데, Synonym은 이전 명칭이므로 correct name인것만 필터링해야 합니다. <br/>
 ```python
+import pandas as pd
+import os
+
 # input file 경로 설정 (사용자가 지정)
-file_path_LPSN = 'input/Genus_LPSN_raw_list.xlsx'
-file_path_GTDB = '../S2. ExtractType/output_WGS_acc/test_WGS_acc.xlsx'
+file_path_LPSN = 'input/Genus_LPSN_list.xlsx'
+file_path_GTDB = '../S2. ExtractType/ouptut_02_Filtering_Type/test_WGS_acc.xlsx'
 
 # 결과를 저장할 디렉터리 생성 (없으면 생성)
 os.makedirs("output_01_LPSN", exist_ok=True)
@@ -297,16 +318,26 @@ output_file_path_02 = "output_02_Comparison/Genus_missing_species.xlsx"
 missing_species_df.to_excel(output_file_path_02, index=False)
 ```
 
-#### 1.5.3 NCBI 웹 크롤링을 통해 GTDB-Tk에서 누락된 validly published species의 whole genome 데이터 유무를 확인하고, 데이터가 존재할 경우 GCA accesscion number를 얻습니다.
+#### 1.5.3 NCBI 웹 크롤링을 통해 GTDB-Tk에서 누락된 validly published species의 whole genome 데이터 유무를 확인하고, 데이터가 존재할 경우 Type 확인 및 accession number를 추출합니다.
+1. *05_extract_Type_in_missing_sp.py*에서 **input_file_path**와 **output_file_path** 변수에 각각 *04_LPSN_GTDB_Species_Comparison.py* 최종 실행 결과 파일의 위치와 *05_extract_Type_in_missing_sp.py* 실행 결과 파일이 저장될 위치를 입력합니다.
+2. *05_extract_Type_in_missing_sp.py*를 실행합니다.
+    - *05_extract_Type_in_missing_sp.py* 실행 결과 파일은 "Missing Species", "Whole genome", "Type", "Accession number", "GCF Link" 열로 구성됩니다.
+    - NCBI에서 TDB-Tk 에서 누락된 종의 whole genome 데이터를 찾고, whole genome 데이터가 있을 경우, 해당 데이터가 type 인지의 유무와 accession number를 제공합니다.
 ```python
-### 3. GTDB-TK에서 누락된 validly published species 중 
-### NCBI에서 whole genome data가 있는 경우 GCA accession number 추출하기
+from bs4 import BeautifulSoup
+import pandas as pd
+import os
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # 기본 webdriver 설정
 driver = webdriver.Chrome()
 
 # 기본 URL 설정
 search_url = "https://www.ncbi.nlm.nih.gov/search/all/?term="
+genome_url_prefix = "https://www.ncbi.nlm.nih.gov"
 
 # 함수 정의: NCBI 검색 결과에서 데이터셋 링크 및 상태 확인
 def fetch_dataset_link(driver, species):
@@ -319,6 +350,7 @@ def fetch_dataset_link(driver, species):
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "ul.nwds-list"))
         )
+        
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
 
@@ -335,78 +367,132 @@ def fetch_dataset_link(driver, species):
         print(f"Error processing '{species}' at {full_url}: {e}")
         return None, "Nonexistent"
 
-# 함수 정의: 데이터셋 페이지에서 GCA 어세션 넘버 추출
-def fetch_gca_accession(driver, dataset_link):
-    # dataset_link가 절대 경로인지 확인하고, 그렇지 않다면 완전한 URL로 변환
+# 함수 정의: 데이터셋 페이지에서 GCF 링크 및 type material 확인
+def fetch_gcf_and_type(driver, dataset_link):
     if not dataset_link.startswith("http"):
-        full_url = f"https://www.ncbi.nlm.nih.gov{dataset_link}"
+        full_url = f"{genome_url_prefix}{dataset_link}"
     else:
         full_url = dataset_link
-        
+
     driver.get(full_url)
     
     try:
+        # GCF 링크 확인
         WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "td.MuiTableCell-root"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "a.MuiLink-root[href*='/datasets/genome/GCF_']"))
         )
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
 
-        # GCA 어세션 넘버를 찾기 위한 <td> 태그들 검색
-        gca_tags = soup.select("td.MuiTableCell-root.MuiTableCell-body.MuiTableCell-sizeMedium.TableCell-cell.TableCell-cellNoWrap")
+        gcf_link_tag = soup.select_one("a.MuiLink-root[href*='/datasets/genome/GCF_']")
+        if gcf_link_tag:
+            gcf_link = f"{genome_url_prefix}{gcf_link_tag['href']}"
 
-        for gca_tag in gca_tags:
-            # 각 <td> 태그에서 <a> 태그가 없는지 확인하고, GCA 패턴 확인
-            if "GCA_" in gca_tag.text and not gca_tag.select_one("a"):
-                # GCA 어세션 넘버가 있는 경우 반환
-                return gca_tag.text.strip()
+            # GCF 링크 페이지에서 type material 확인
+            driver.get(gcf_link)
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//dt[contains(text(), 'Relation to type material')]"))
+            )
 
-        return "GCA Not Found"  # 조건을 만족하는 GCA가 없을 경우
+            html = driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+
+            # HTML 데이터 파싱
+            cols = soup.select('dl dt')
+            els = soup.select('dl dd')
+            cols_list = [t.text for t in cols]
+            els_list = [t.text for t in els]
+
+            if 'Relation to type material' in cols_list:
+                type_material = "yes"
+            else:
+                type_material = "no"
+
+            return gcf_link, type_material
+        else:
+            return None, "No GCF link found"
     except Exception as e:
-        print(f"Error fetching GCA accession from {full_url}: {e}")
-        return "Error"
-    
-# 함수 정의: Missing Species 데이터프레임 처리 및 결과 저장 함수
-def process_missing_species(missing_species_df):
+        print(f"Error fetching GCF link from {full_url}: {e}")
+        return None, "Error"
+
+# 입력 엑셀 파일 처리 함수
+def process_excel(input_file, output_file_name):
+    df = pd.read_excel(input_file)
+
     # 크롤링 결과를 저장할 리스트
     whole_genome_status_list = []
-    gca_accession_list = []
+    type_material_list = []
+    gcf_link_list = []
+    accession_number_list = []
 
-    for species in missing_species_df['Missing Species']:
+    for species in df['Missing Species']:
         species_terms = species.split()
         if len(species_terms) >= 2:
             dataset_link, status = fetch_dataset_link(driver, species_terms[:2])
             whole_genome_status_list.append(status)
             
             if dataset_link and status == "Existence":
-                gca_accession = fetch_gca_accession(driver, dataset_link)
-                gca_accession_list.append(gca_accession)
+                gcf_link, type_material = fetch_gcf_and_type(driver, dataset_link)
+                gcf_link_list.append(gcf_link)
+                type_material_list.append(type_material)
+
+                # Accession number 추출
+                if gcf_link:
+                    accession_number = gcf_link.rstrip('/').split('/')[-1]
+                    accession_number_list.append(accession_number)
+                else:
+                    accession_number_list.append(None)
             else:
-                gca_accession_list.append(None)
+                gcf_link_list.append(None)
+                type_material_list.append(None)
+                accession_number_list.append(None)
         else:
             whole_genome_status_list.append("Invalid Name")
-            gca_accession_list.append(None)
+            gcf_link_list.append(None)
+            type_material_list.append(None)
+            accession_number_list.append(None)
 
-    missing_species_df['Whole genome'] = whole_genome_status_list
-    missing_species_df['GCA Accession'] = gca_accession_list
-    
-    # 결과를 저장할 디렉토리 생성
+    # 데이터프레임 업데이트
+    df['Whole genome'] = whole_genome_status_list
+    df['Type'] = type_material_list
+    df['Accession number'] = accession_number_list
+    df['GCF Link'] = gcf_link_list
+
+    # 결과 저장
     output_dir = os.path.join(os.getcwd(), "output_03_WGS")
     os.makedirs(output_dir, exist_ok=True)
-    
-    # 결과를 저장할 파일 이름 생성
-    output_file = os.path.join(output_dir, "WGS_checked_missing_species.xlsx")
-    missing_species_df.to_excel(output_file, index=False)
+    output_file = os.path.join(output_dir, output_file_name)
+    df.to_excel(output_file, index=False)
     print(f"저장된 파일: {output_file}")
 
-# process_missing_species 함수 실행
-process_missing_species(missing_species_df)
+
+# 입력 파일 경로와 출력 파일 이름 설정
+input_file_path = "output_02_Comparison/test_missing_species.xlsx"
+output_file_name = "test_missing_sp_Type_GCA.xlsx"  # 사용자 정의 출력 파일 이름
+
+# 함수 실행
+process_excel(input_file_path, output_file_name)
 
 # 드라이버 닫기
 driver.quit()
 ```
 
+<br/>
+
+### 1.6 Download Whole Genomes of Type Species
+이제 마지막으로 지금까지 필터링하고 추출한 type species의 whole genome 데이터를 다운로드 받아 UBCG tree를 그릴 준비를 마무리합니다.
+
+아래 두 파일이 이 과정을 위해 필요한 최종 파일입니다.
+- S2. ExtractType\output_02_Filtering_Type\test_WGS_acc.xlsx
+- S3. CompareToLPSN\output_03_WGS\test_missing_sp_Type_GCA.xlsx
+
+#### 1.6.1 전처리 
+1. 두 엑셀 파일에서 에러 메세지가 표시되어 있거나 NA 값이 있는 경우 NCBI에 재검색하여 데이터를 처리합니다.
+2. 두 엑셀 파일에서 Type인 species의 GCA 또는 GCF accession number만 모아 중복 검사를 시행합니다.
+3. 전처리된 accession number를 모아 텍스트 파일에 붙여넣습니다.
+
+#### 1.6.2 Whole genome 계통수를 그릴 신종 균주의 genus의 모든 type species의 whole genome 얻기
+1. [Batch Entrez](https://www.ncbi.nlm.nih.gov/sites/batchentrez)에서 Database를 “Assembly”로 선택한 후, File에 생성한 텍스트 파일 업로드 후, “Retreive”하여 whole genome 시퀀스 파일을 다운로드합니다.
 
 
- 
 
