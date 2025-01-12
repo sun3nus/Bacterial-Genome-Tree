@@ -12,7 +12,6 @@
 ### GTDB-Tk와 UBCG의 병행 사용의 필요성
 세균 신종 논문에서는 type strain만을 포함하여 계통수를 구축하는 것이 원칙이므로, GTDB-Tk 결과에서 type strain만 필터링한 후 UBCG를 사용해 whole genome tree를 재구축 할 필요성이 있습니다. 결론적으로, GTDB-Tk와 UBCG는 각각의 강점을 통해 신뢰할 수 있는 bacterial whole genome tree를 구축하는 데 필수적인 도구입니다. 
 
-
 ## Index
 ```
 0. Introduction
@@ -30,6 +29,7 @@
     2.4 Edit UBCG tree
 ```
 
+<br/>
 
 ## 1. GTDB-Tk
 ### 1.1 Setup GTDB-tk
