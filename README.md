@@ -136,12 +136,14 @@ conda update conda
 
 3. 로딩 후 나오는 메세지에 **Reload page** 클릭 후, **Control panel**의 **Basic** 클릭, **Mode**에서 **Rectangular**을 클릭합니다.
 4. 좌측 돋보기 모양 중 **Search tree nodes**를 클릭하여 GTDB-Tk의 input fasta 파일의 이름을 검색합니다.
-5. 검색 결과 Node ID를 클릭하면, 게통수를 작성하고자 input으로 넣어준 신종주의 위치로 이동하게 됩니다.
+5. 검색 결과 Node ID를 클릭하면, 게통수를 작성하고자 input으로 넣어준 신종균주의 위치로 이동하게 됩니다.
 6. 삼각형으로 축소되어 있는 경우, 좌클릭하여 **Expand clade**를 클릭합니다.
 7. 계통수를 그리고자 하는 신종 균주가 속한 genus의 시작과 끝 species의 Node ID를 복사합니다.
 
 #### 1.3.2 Generate GTDB-Tk sub-tree
-1. *01_GTDB-Tk_subtree.py* 에서 **tree_file** 변수에 GTDB-Tk 실행 최종 결과 tree 파일의 위치와 **output_file** 변수에 저장될 output 파일의 위치와 이름을 입력합니다.
+1. *01_GTDB-Tk_subtree.py* 에서 **tree_file**와 **output_file** 변수에 각각 GTDB-Tk 실행 최종 결과 tree 파일의 위치와, 생성된 sub-tree 파일을 저장할 위치를 입력합니다.
+    * :bulb: GTDB-Tk/S1.SubTree/input 디렉토리에 GTDB-Tk 실행 최종 결과 tree 파일을 넣기
+    * :bulb: 아래 스크립트의 **3. 파일 위치 설정**에서 test_itol.tree, test_subtree.nwk 이름을 수정
 2. **target_taxa** 리스트 변수에 iTOL에서 복사한 genus의 시작과 끝 species의 Node ID를 입력합니다.
 3. *01_GTDB-Tk.subtree.py* 실행합니다.
 ```python
