@@ -226,45 +226,57 @@ GTDB-Tk 데이터베이스는 지속적으로 업데이트되지만 많은 양�
 
 1. [LSPN](https://www.bacterio.net/)에 계통수를 구축하고자 하는 신종 균주의 genus를 입력합니다.
 2. Child taxa 표를 복사하여 새로운 엑셀 파일을 만듭니다. 파일 이름은 “속이름_LPSN_list.xlsx”로 하고, S3.CompareToLPSN 디렉토리의 input 폴더에 저장합니다.
-3. *04_LPSN_GTDB_Species_Comparison*에서 **file_path_LPSN**에 방금 생성한 엑셀 파일의 위치를 지정합니다.
-3. *04_LPSN_GTDB_Species_Comparison*를 실행합니다. 이 스크립트는 총 세가지 기능을 수행합니다.
+3. *04_LPSN_GTDB_Species_Comparison.py*에서 **file_path_LPSN**에 방금 생성한 엑셀 파일의 위치를 지정합니다.
+3. *04_LPSN_GTDB_Species_Comparison.py*를 실행합니다. 이 스크립트는 총 세가지 기능을 수행합니다.
 
 <br/>
 
-1. LPSN species list에서 validly published된 species만 필터링합니다.
+#### 1.5.0 *04_LPSN_GTDB_Species_Comparison.py* 실행에 필요한 라이브러리 및 모듈 불러오기
+```python
+import pandas as pd
+import os
 
-    * "Nomenclatural status" 열이 "validly published under the ICNP"인 데이터 중에는 "Taxonomic status"가 "correct name"과 "Synonym"인 것이 있는데, Synonym은 이전 명칭이므로 correct name인것만 필터링해야 합니다.
-    ```python
-    # input file 경로 설정 (사용자가 지정)
-    file_path_LPSN = 'input/Genus_LPSN_raw_list.xlsx'
-    file_path_GTDB = '../S2. ExtractType/output_WGS_acc/test_WGS_acc.xlsx'
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+```
 
-    # 결과를 저장할 디렉터리 생성 (없으면 생성)
-    os.makedirs("output_01_LPSN", exist_ok=True)
-    os.makedirs("output_02_Comparison", exist_ok=True)
-    os.makedirs("output_03_WGS", exist_ok=True)
+#### 1.5.1 LPSN species list에서 validly published된 species만 필터링합니다.
 
-    # input file 읽기
-    LPSN_df = pd.read_excel(file_path_LPSN)
-    GTDB_df = pd.read_excel(file_path_GTDB)
+* "Nomenclatural status" 열이 "validly published under the ICNP"인 데이터 중에는 "Taxonomic status"가 "correct name"과 "Synonym"인 것이 있는데, Synonym은 이전 명칭이므로 correct name인것만 필터링해야 합니다. <br/>
+```python
+# input file 경로 설정 (사용자가 지정)
+file_path_LPSN = 'input/Genus_LPSN_raw_list.xlsx'
+file_path_GTDB = '../S2. ExtractType/output_WGS_acc/test_WGS_acc.xlsx'
 
-    ### 1. LPSN 데이터에서 validly published된 correct name 필터링
+# 결과를 저장할 디렉터리 생성 (없으면 생성)
+os.makedirs("output_01_LPSN", exist_ok=True)
+os.makedirs("output_02_Comparison", exist_ok=True)
+os.makedirs("output_03_WGS", exist_ok=True)
 
-    # "Taxonomic status" 값이 "correct name"인 행만 필터링
-    LPSN_df_filtered = LPSN_df[LPSN_df['Taxonomic status'] == 'correct name']
+# input file 읽기
+LPSN_df = pd.read_excel(file_path_LPSN)
+GTDB_df = pd.read_excel(file_path_GTDB)
 
-    # "Name" 열의 앞 두 단어만 추출 -> 종 속 명만 추출
-    LPSN_df_filtered['Name'] = LPSN_df_filtered['Name'].apply(lambda x: ' '.join(x.split()[:2]))
+### 1. LPSN 데이터에서 validly published된 correct name 필터링
 
-    # 총 데이터 개수 확인
-    total_count = len(LPSN_df_filtered)
-    print("LPSN validly published species 개수: ", total_count)
+# "Taxonomic status" 값이 "correct name"인 행만 필터링
+LPSN_df_filtered = LPSN_df[LPSN_df['Taxonomic status'] == 'correct name']
 
-    # 수정된 데이터프레임을 새로운 엑셀 파일로 저장
-    output_file_path_01 = 'output_01_LPSN/Genus_LPSN_validation_list.xlsx'
-    LPSN_df_filtered.to_excel(output_file_path_01, index=False)
-    ```
-2. LPSN과 GTDB-Tk 데이터의 validly published species 리스트를 비교하여 GTDB-Tk에서 누락된 species를 추출합니다.
+# "Name" 열의 앞 두 단어만 추출 -> 종 속 명만 추출
+LPSN_df_filtered['Name'] = LPSN_df_filtered['Name'].apply(lambda x: ' '.join(x.split()[:2]))
+
+# 총 데이터 개수 확인
+total_count = len(LPSN_df_filtered)
+print("LPSN validly published species 개수: ", total_count)
+
+# 수정된 데이터프레임을 새로운 엑셀 파일로 저장
+output_file_path_01 = 'output_01_LPSN/Genus_LPSN_validation_list.xlsx'
+LPSN_df_filtered.to_excel(output_file_path_01, index=False)
+```
+#### 1.5.2 LPSN과 GTDB-Tk 데이터의 validly published species 리스트를 비교하여 GTDB-Tk에서 누락된 species를 추출합니다.
 ```python
 ### 2. LPSN validly published species 리스트와 GTDB-Tk 데이터 비교
 
@@ -283,7 +295,115 @@ output_file_path_02 = "output_02_Comparison/Genus_missing_species.xlsx"
 missing_species_df.to_excel(output_file_path_02, index=False)
 ```
 
-3. 
+#### 1.5.3 NCBI 웹 크롤링을 통해 GTDB-Tk에서 누락된 validly published species의 whole genome 데이터 유무를 확인하고, 데이터가 존재할 경우 GCA accesscion number를 얻습니다.
+```python
+### 3. GTDB-TK에서 누락된 validly published species 중 
+### NCBI에서 whole genome data가 있는 경우 GCA accession number 추출하기
+
+# 기본 webdriver 설정
+driver = webdriver.Chrome()
+
+# 기본 URL 설정
+search_url = "https://www.ncbi.nlm.nih.gov/search/all/?term="
+
+# 함수 정의: NCBI 검색 결과에서 데이터셋 링크 및 상태 확인
+def fetch_dataset_link(driver, species):
+    query = '+'.join(species)  # 두 단어로 구성된 species를 +로 결합
+    full_url = f"{search_url}{query}"
+    driver.get(full_url)
+    
+    try:
+        # 페이지가 로드될 때까지 대기
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "ul.nwds-list"))
+        )
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # 데이터셋 링크 확인
+        dataset_link_tag = soup.select_one("a#search_db_datasets")
+        status_tag = soup.select_one("a#search_db_datasets > span.mdc-chip.nwds-chip.nwds-chip--label.result-count.status-200")
+        
+        if dataset_link_tag and status_tag:
+            dataset_link = dataset_link_tag['href']
+            return dataset_link, "Existence"
+        else:
+            return None, "Nonexistent"
+    except Exception as e:
+        print(f"Error processing '{species}' at {full_url}: {e}")
+        return None, "Nonexistent"
+
+# 함수 정의: 데이터셋 페이지에서 GCA 어세션 넘버 추출
+def fetch_gca_accession(driver, dataset_link):
+    # dataset_link가 절대 경로인지 확인하고, 그렇지 않다면 완전한 URL로 변환
+    if not dataset_link.startswith("http"):
+        full_url = f"https://www.ncbi.nlm.nih.gov{dataset_link}"
+    else:
+        full_url = dataset_link
+        
+    driver.get(full_url)
+    
+    try:
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "td.MuiTableCell-root"))
+        )
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # GCA 어세션 넘버를 찾기 위한 <td> 태그들 검색
+        gca_tags = soup.select("td.MuiTableCell-root.MuiTableCell-body.MuiTableCell-sizeMedium.TableCell-cell.TableCell-cellNoWrap")
+
+        for gca_tag in gca_tags:
+            # 각 <td> 태그에서 <a> 태그가 없는지 확인하고, GCA 패턴 확인
+            if "GCA_" in gca_tag.text and not gca_tag.select_one("a"):
+                # GCA 어세션 넘버가 있는 경우 반환
+                return gca_tag.text.strip()
+
+        return "GCA Not Found"  # 조건을 만족하는 GCA가 없을 경우
+    except Exception as e:
+        print(f"Error fetching GCA accession from {full_url}: {e}")
+        return "Error"
+    
+# 함수 정의: Missing Species 데이터프레임 처리 및 결과 저장 함수
+def process_missing_species(missing_species_df):
+    # 크롤링 결과를 저장할 리스트
+    whole_genome_status_list = []
+    gca_accession_list = []
+
+    for species in missing_species_df['Missing Species']:
+        species_terms = species.split()
+        if len(species_terms) >= 2:
+            dataset_link, status = fetch_dataset_link(driver, species_terms[:2])
+            whole_genome_status_list.append(status)
+            
+            if dataset_link and status == "Existence":
+                gca_accession = fetch_gca_accession(driver, dataset_link)
+                gca_accession_list.append(gca_accession)
+            else:
+                gca_accession_list.append(None)
+        else:
+            whole_genome_status_list.append("Invalid Name")
+            gca_accession_list.append(None)
+
+    missing_species_df['Whole genome'] = whole_genome_status_list
+    missing_species_df['GCA Accession'] = gca_accession_list
+    
+    # 결과를 저장할 디렉토리 생성
+    output_dir = os.path.join(os.getcwd(), "output_03_WGS")
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # 결과를 저장할 파일 이름 생성
+    output_file = os.path.join(output_dir, "WGS_checked_missing_species.xlsx")
+    missing_species_df.to_excel(output_file, index=False)
+    print(f"저장된 파일: {output_file}")
+
+# process_missing_species 함수 실행
+process_missing_species(missing_species_df)
+
+# 드라이버 닫기
+driver.quit()
+```
+
 
 
  
