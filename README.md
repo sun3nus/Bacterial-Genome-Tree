@@ -258,7 +258,7 @@ GTDB-Tk 데이터베이스는 지속적으로 업데이트되지만 많은 양�
 
 1. [LSPN](https://www.bacterio.net/)에 계통수를 구축하고자 하는 신종 균주의 genus를 입력합니다.
 2. Child taxa 표를 복사하여 새로운 엑셀 파일을 만듭니다. 파일 이름은 “속이름_LPSN_list.xlsx”로 하고, S3.CompareToLPSN 디렉토리의 input 폴더에 저장합니다.
-3. *04_LPSN_GTDB_Species_Comparison.py*에서 **file_path_LPSN**에 방금 생성한 엑셀 파일의 위치를 지정합니다.
+3. <span style="background-color:#fff5b1"> *04_LPSN_GTDB_Species_Comparison.py* </span>에서 **file_path_LPSN**에 방금 생성한 엑셀 파일의 위치를 지정합니다.
 3. *04_LPSN_GTDB_Species_Comparison.py*를 실행합니다.
 
 <br/>
