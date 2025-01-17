@@ -219,7 +219,7 @@ with open(output_file_path, 'w') as file:
 
 #### 1.4.2 Filter Type Strains
 1. <span style="background-color:#fff5b1"> *03_extract_Type_strains.py* </span> 에서 **input_path** 변수에 앞서 생성한 genome accession number txt 파일의 위치를 입력합니다.
-2. *03_extract_Type_strains.py*를 실행합니다.
+2. <span style="background-color:#fff5b1"> *03_extract_Type_strains.py* </span>를 실행합니다.
 3. 실행 결과, input txt 파일 이름과 동일한 엑셀 파일이 형성되며, 이 엑셀 파일은 "Give number", "Type", "Submitted GenBank assembly", "Taxon", "Strain", "Url" 열로 구성되어 있습니다.
 4. "Type" 열이 **yes**인 균주들의 whole genome fasta 파일로 추후 UBCG tree 를 구축할 예정입니다.
 ```python
