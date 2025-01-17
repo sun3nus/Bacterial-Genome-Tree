@@ -18,14 +18,12 @@ def extract_subtree(tree_file, output_file, target_taxa):
     Phylo.write(subtree, output_file, "newick")
 
 ## 3. 파일 위치 설정 ##
-tree_file = 'input/DG2-3_itol_new.tree'
-output_file = 'output/DG2-3_subtree_new.nwk'
+tree_file = 'input/test_itol.tree'
+output_file = 'output/test_subtree.nwk'
 
 ## 4. 서브트리 시작, 위치 설정 ##
 # target_taxa = ['시작 어세션 넘버', '끝 어세션 넘버']
 target_taxa = ['GB_GCA_002482885.1', 'RS_GCF_900101855.1'] 
-#RS_GCF_020907245.1
-
 
 ## 5. 서브트리 생성 ##
 extract_subtree(tree_file, output_file, target_taxa)
