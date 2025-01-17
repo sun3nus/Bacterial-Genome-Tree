@@ -19,9 +19,9 @@
     1.1 Setup GTDB-Tk
     1.2 Run GTDB-Tk
     1.3 Generate GTDB-Tk Subtree
-    1.4 Filter Type Species and Collect GCA Acc
-    1.5 Compare with LPSN Validation Type Species List
-    1.6 Download Whole Genomes of Type Species
+    1.4 Filter Type Strains and Collect GCA Acc
+    1.5 Compare with LPSN Validation Type Strains List
+    1.6 Download Whole Genomes of Type Strains
 2. UBCG
     2.1 Setup UBCG
     2.2 Prepare Whole Genome FASTA files
@@ -141,11 +141,11 @@ conda update conda
 7. 계통수를 그리고자 하는 신종 균주가 속한 genus의 시작과 끝 species의 Node ID를 복사합니다.
 
 #### 1.3.2 Generate GTDB-Tk sub-tree
-1. *01_GTDB-Tk_subtree.py* 에서 **tree_file**와 **output_file** 변수에 각각 GTDB-Tk 실행 최종 결과 tree 파일의 위치와, 생성된 sub-tree 파일을 저장할 위치를 입력합니다.
+1. <span style="background-color:#fff5b1"> *01_GTDB-Tk_subtree.py* </span> 에서 **tree_file**와 **output_file** 변수에 각각 GTDB-Tk 실행 최종 결과 tree 파일의 위치와, 생성된 sub-tree 파일을 저장할 위치를 입력합니다.
     * :bulb: GTDB-Tk/S1.SubTree/input 디렉토리에 GTDB-Tk 실행 최종 결과 tree 파일을 넣기
     * :bulb: 아래 스크립트의 **3. 파일 위치 설정**에서 test_itol.tree, test_subtree.nwk 이름을 수정
 2. **target_taxa** 리스트 변수에 iTOL에서 복사한 genus의 시작과 끝 species의 Node ID를 입력합니다.
-3. *01_GTDB-Tk.subtree.py* 실행합니다.
+3. <span style="background-color:#fff5b1"> *01_GTDB-Tk.subtree.py* </span> 실행합니다.
 ```python
 ## 1. Biopython 환경설정 ##
 #pip install biopython
@@ -180,11 +180,11 @@ extract_subtree(tree_file, output_file, target_taxa)
 
 <br/>
 
-### 1.4 Filter Type Species and Collect GCA Acc
+### 1.4 Filter Type Strains and Collect GCA Acc
 #### 1.4.1 Extract Genome Accesion Number in Sub-tree
-1. *02_extract_WGS_acc.py* 에서 **nwk_file_path** 변수에 앞서 생성한 sub-tree 파일의 위치를 입력합니다.
+1. <span style="background-color:#fff5b1"> *02_extract_WGS_acc.py* </span> 에서 **nwk_file_path** 변수에 앞서 생성한 sub-tree 파일의 위치를 입력합니다.
 2. **output_file_path** 변수에 결과 파일의 위치와 이름을 입력합니다.
-3. *02_extract_WGS_acc.py* 를 실행합니다.
+3. <span style="background-color:#fff5b1"> *02_extract_WGS_acc.py* </span> 를 실행합니다.
 4. 실행 결과, sub-tree 안의 모든 species의 genome accession number가 txt 파일 형식으로 추출됩니다.
 ```python
 # nwk 파일에서 'RS' 또는 'GB'로 시작하는 문자열을 ':' 문자 이전까지 추출하고, 
@@ -217,9 +217,9 @@ with open(output_file_path, 'w') as file:
         file.write(prefix + '\n')
 ```
 
-#### 1.4.2 Filter Type species
-1. *03_extract_Type_species.py* 에서 **input_path** 변수에 앞서 생성한 genome accession number txt 파일의 위치를 입력합니다.
-2. *03_extract_Type_species.py*를 실행합니다.
+#### 1.4.2 Filter Type Strains
+1. *03_extract_Type_strains.py* 에서 **input_path** 변수에 앞서 생성한 genome accession number txt 파일의 위치를 입력합니다.
+2. *03_extract_Type_strains.py*를 실행합니다.
 3. 실행 결과, input txt 파일 이름과 동일한 엑셀 파일이 형성되며, 이 엑셀 파일은 "Give number", "Type", "Submitted GenBank assembly", "Taxon", "Strain", "Url" 열로 구성되어 있습니다.
 4. "Type" 열이 **yes**인 균주들의 whole genome fasta 파일로 추후 UBCG tree 를 구축할 예정입니다.
 ```python
@@ -251,7 +251,7 @@ with open(output_file_path, 'w') as file:
 ```
 <br/>
 
-### 1.5 Compare with LPSN Validation Type Species List
+### 1.5 Compare with LPSN Validation Type Strains List
 GTDB-Tk 데이터베이스는 지속적으로 업데이트되지만 많은 양의 신종 세균이 빠르게 업데이트 되기 때문에 모든 균주의 데이터를 포함하고 있지는 못합니다. <br/>
 
 따라서 LPSN과 같은 validly published된 원핵생물(세균 및 고세균)의 공식적인 정보를 제공하는 온라인 데이터베이스와 GTDB-Tk 데이터베이스에서 필터링된 데이터를 비교할 필요가 있습니다.
@@ -479,8 +479,8 @@ driver.quit()
 
 <br/>
 
-### 1.6 Download Whole Genomes of Type Species
-이제 마지막으로 지금까지 필터링하고 추출한 type species의 whole genome 데이터를 다운로드 받아 UBCG tree를 그릴 준비를 마무리합니다.
+### 1.6 Download Whole Genomes of Type Strains
+이제 마지막으로 지금까지 필터링하고 추출한 type strains의 whole genome 데이터를 다운로드 받아 UBCG tree를 그릴 준비를 마무리합니다.
 
 아래 두 파일이 이 과정을 위해 필요한 최종 파일입니다.
 - S2. ExtractType\output_02_Filtering_Type\test_WGS_acc.xlsx
@@ -488,10 +488,10 @@ driver.quit()
 
 #### 1.6.1 전처리 
 1. 두 엑셀 파일에서 에러 메세지가 표시되어 있거나 NA 값이 있는 경우 NCBI에 재검색하여 데이터를 처리합니다.
-2. 두 엑셀 파일에서 Type인 species의 GCA 또는 GCF accession number만 모아 중복 검사를 시행합니다.
+2. 두 엑셀 파일에서 Type인 strains의 GCA 또는 GCF accession number만 모아 중복 검사를 시행합니다.
 3. 전처리된 accession number를 모아 텍스트 파일에 붙여넣습니다.
 
-#### 1.6.2 Whole genome 계통수를 그릴 신종 균주의 genus의 모든 type species의 whole genome 얻기
+#### 1.6.2 Whole genome 계통수를 그릴 신종 균주의 genus의 모든 type strains의 whole genome 얻기
 1. [Batch Entrez](https://www.ncbi.nlm.nih.gov/sites/batchentrez)에서 Database를 “Assembly”로 선택한 후, File에 생성한 텍스트 파일 업로드 후, “Retreive”하여 whole genome 시퀀스 파일을 다운로드합니다.
 
 
