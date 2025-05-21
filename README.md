@@ -494,87 +494,88 @@ driver.quit()
 #### 1.6.2 Whole genome 계통수를 그릴 신종 균주의 genus의 모든 type strains의 whole genome 얻기
 1. [Batch Entrez](https://www.ncbi.nlm.nih.gov/sites/batchentrez)에서 Database를 “Assembly”로 선택한 후, File에 생성한 텍스트 파일 업로드 후, “Retreive”하여 whole genome 시퀀스 파일을 다운로드합니다.
 2. NCBI Batch Entrez가 작동하지 않는 경우 아래 방법을 사용합니다.
-(1) 리눅스 상에서 NCBI Datasets CLI를 설치합니다.
-```bash
-conda install -c conda-forge ncbi-datasets-cli
-```
-(2) 전처리된 accession number를 모은 텍스트 파일명을 아래의 ***06_download_WGS_with_GCA.py***의 [Input File]에 입력 후, 저장합니다.
-```bash
-nano 06_download_WGS_with_GCA.py # 파일 열기
-ctrl + O # 파일 수정 후 nano에서 저장
-ctrl + X # 파일 저장 후 닫기
-```
-```python
-import os
-
-# 텍스트 파일 경로
-file_path = "[Input File]"
-
-# GCA 번호 리스트를 읽어옵니다.
-with open(file_path, 'r') as file:
-    gca_numbers = [line.strip() for line in file.readlines()]
-
-# 각 GCA 번호에 대해 다운로드 명령어 실행
-for gca in gca_numbers:
-    command = f"datasets download genome accession {gca} --include genome --filename {gca}.zip"
-    os.system(command)
-    print(f"Downloaded {gca}.zip")
-```
-```bash
-python3 06_download_WGS_with_GCA.py #06_download_WGS_with_GCA.py 실행하기
-```
-(3) 06_download_WGS_with_GCA.py으로 다운로드 된 Genome fasta zip 파일을 압축 해제합니다.
-```bash
-unzip *.zip
-```
-(4) 압축해제된 Genome fasta 파일 안의 모든 fasta 파일을 하나의 디렉토리에 복사하여 저장합니다.
-(5) 모든 fasta 파일을 "WGS_fasta" 라는 하나의 폴더로 모으기 위해 ***07_gather_all_fasta.py***를 실행합니다.
-```python
-import os
-import shutil
-import zipfile
-
-# WGS_fasta 디렉토리가 없으면 생성
-destination_dir = "WGS_fasta"
-if not os.path.exists(destination_dir):
-    os.makedirs(destination_dir)
-
-# fasta 파일 확장자 목록
-fasta_extensions = ['.fasta', '.fa', '.fna']
-
-# 현재 디렉토리와 하위 디렉토리의 모든 파일을 검색
-for root, dirs, files in os.walk('.'):
-    for file_name in files:
-        # 파일의 전체 경로
-        file_path = os.path.join(root, file_name)
-
-        # 확장자에 따른 동작
-        if any(file_name.endswith(ext) for ext in fasta_extensions):
-            # fasta 파일을 WGS_fasta 디렉토리로 복사
-            destination_path = os.path.join(destination_dir, file_name)
-            if not os.path.exists(destination_path):
-                shutil.copy2(file_path, destination_path)
-                print(f"Copied {file_name} from {root} to {destination_dir}")
-            else:
-                print(f"Skipped {file_name}; already exists in {destination_dir}")
-        
-        elif file_name.endswith('.zip'):
-            # zip 파일 처리
-            with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                for zip_info in zip_ref.infolist():
-                    # zip 파일 내의 파일 이름 확인
-                    if any(zip_info.filename.endswith(ext) for ext in fasta_extensions):
-                        # 압축된 파일 추출
-                        extracted_path = zip_ref.extract(zip_info, destination_dir)
-                        print(f"Extracted {zip_info.filename} from {file_name} to {destination_dir}")
-```
-```bash
-python3 07_gather_all_fasta.py #07_gather_all_fasta.py 실행
-```
-(6) 07_gather_all_fasta.py 실행 결과를 확인합니다. Input으로 입력한 텍스트 파일 내 모든 GCA accession number 수와 다운로드 된 모든 fasta 파일 수가 같은지 확인합니다.
-```bash
-cd WGS_fasta
-```
+3. <br/>
+    (1) 리눅스 상에서 NCBI Datasets CLI를 설치합니다.
+    ```bash
+    conda install -c conda-forge ncbi-datasets-cli
+    ```
+    (2) 전처리된 accession number를 모은 텍스트 파일명을 아래의 ***06_download_WGS_with_GCA.py***의 [Input File]에 입력 후, 저장합니다.
+    ```bash
+    nano 06_download_WGS_with_GCA.py # 파일 열기
+    ctrl + O # 파일 수정 후 nano에서 저장
+    ctrl + X # 파일 저장 후 닫기
+    ```
+    ```python
+    import os
+    
+    # 텍스트 파일 경로
+    file_path = "[Input File]"
+    
+    # GCA 번호 리스트를 읽어옵니다.
+    with open(file_path, 'r') as file:
+        gca_numbers = [line.strip() for line in file.readlines()]
+    
+    # 각 GCA 번호에 대해 다운로드 명령어 실행
+    for gca in gca_numbers:
+        command = f"datasets download genome accession {gca} --include genome --filename {gca}.zip"
+        os.system(command)
+        print(f"Downloaded {gca}.zip")
+    ```
+    ```bash
+    python3 06_download_WGS_with_GCA.py #06_download_WGS_with_GCA.py 실행하기
+    ```
+    (3) 06_download_WGS_with_GCA.py으로 다운로드 된 Genome fasta zip 파일을 압축 해제합니다.
+    ```bash
+    unzip *.zip
+    ```
+    (4) 압축해제된 Genome fasta 파일 안의 모든 fasta 파일을 하나의 디렉토리에 복사하여 저장합니다.
+    (5) 모든 fasta 파일을 "WGS_fasta" 라는 하나의 폴더로 모으기 위해 ***07_gather_all_fasta.py***를 실행합니다.
+    ```python
+    import os
+    import shutil
+    import zipfile
+    
+    # WGS_fasta 디렉토리가 없으면 생성
+    destination_dir = "WGS_fasta"
+    if not os.path.exists(destination_dir):
+        os.makedirs(destination_dir)
+    
+    # fasta 파일 확장자 목록
+    fasta_extensions = ['.fasta', '.fa', '.fna']
+    
+    # 현재 디렉토리와 하위 디렉토리의 모든 파일을 검색
+    for root, dirs, files in os.walk('.'):
+        for file_name in files:
+            # 파일의 전체 경로
+            file_path = os.path.join(root, file_name)
+    
+            # 확장자에 따른 동작
+            if any(file_name.endswith(ext) for ext in fasta_extensions):
+                # fasta 파일을 WGS_fasta 디렉토리로 복사
+                destination_path = os.path.join(destination_dir, file_name)
+                if not os.path.exists(destination_path):
+                    shutil.copy2(file_path, destination_path)
+                    print(f"Copied {file_name} from {root} to {destination_dir}")
+                else:
+                    print(f"Skipped {file_name}; already exists in {destination_dir}")
+            
+            elif file_name.endswith('.zip'):
+                # zip 파일 처리
+                with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                    for zip_info in zip_ref.infolist():
+                        # zip 파일 내의 파일 이름 확인
+                        if any(zip_info.filename.endswith(ext) for ext in fasta_extensions):
+                            # 압축된 파일 추출
+                            extracted_path = zip_ref.extract(zip_info, destination_dir)
+                            print(f"Extracted {zip_info.filename} from {file_name} to {destination_dir}")
+    ```
+    ```bash
+    python3 07_gather_all_fasta.py #07_gather_all_fasta.py 실행
+    ```
+    (6) 07_gather_all_fasta.py 실행 결과를 확인합니다. Input으로 입력한 텍스트 파일 내 모든 GCA accession number 수와 다운로드 된 모든 fasta 파일 수가 같은지 확인합니다.
+    ```bash
+    cd WGS_fasta
+    ```
 3. 이제 GTDB db 기반 type strains only UBCG tree를 그리기 위한 준비가 완료되었습니다.
 
 
